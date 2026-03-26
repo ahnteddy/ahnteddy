@@ -1,0 +1,482 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해커톤 발표 브리핑</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #f8f9fa;
+  --white: #ffffff;
+  --border: #e9ecef;
+  --border2: #dee2e6;
+  --text: #212529;
+  --muted: #868e96;
+  --muted2: #495057;
+  --green: #0a8f5c;
+  --green-bg: rgba(10,143,92,0.07);
+  --green-border: rgba(10,143,92,0.2);
+  --blue: #1971c2;
+  --blue-bg: rgba(25,113,194,0.07);
+  --blue-border: rgba(25,113,194,0.2);
+  --amber: #e67700;
+  --amber-bg: rgba(230,119,0,0.07);
+  --amber-border: rgba(230,119,0,0.2);
+  --sans: 'Noto Sans KR', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 56px;
+  animation: fadeUp 0.5s ease both;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 4px;
+  padding: 4px 12px;
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+}
+.header-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease infinite;
+}
+.header h1 {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.header h1 span { color: var(--green); }
+.header-sub { color: var(--muted2); font-size: 15px; }
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 56px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+
+.team-card {
+  background: var(--white);
+  border: 2px solid var(--border2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+.team-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.team-card.c1 { border-color: var(--green); }
+.team-card.c2 { border-color: var(--blue); }
+.team-card.c3 { border-color: var(--amber); }
+
+.avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700;
+  margin: 0 auto 12px;
+  color: #fff;
+}
+.av1 { background: var(--green); }
+.av2 { background: var(--blue); }
+.av3 { background: var(--amber); }
+
+.team-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.role-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+.rt1 { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.rt2 { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.rt3 { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.team-desc { font-size: 12px; color: var(--muted2); line-height: 1.5; }
+
+.section { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+.section:nth-child(6) { animation-delay: 0.25s; }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.section-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  color: #fff; flex-shrink: 0;
+}
+.si1 { background: var(--green); }
+.si2 { background: var(--blue); }
+.si3 { background: var(--amber); }
+
+.section-title { font-size: 18px; font-weight: 700; flex: 1; }
+.section-toggle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.section-body {
+  background: var(--white);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.section-body.collapsed { display: none; }
+
+.presenter-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.p-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: #fff; flex-shrink: 0;
+}
+.presenter-name { font-size: 14px; font-weight: 700; }
+.presenter-role { font-size: 12px; color: var(--muted2); }
+
+.item {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.item:last-child { border-bottom: none; }
+
+.item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.item-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px; color: var(--muted2);
+  flex-shrink: 0; margin-top: 2px;
+}
+.item-title { font-size: 15px; font-weight: 700; flex: 1; }
+.item-body { padding-left: 34px; }
+
+.bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 14px;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+.bullet::before {
+  content: '—';
+  color: var(--muted);
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.bullet b { color: var(--text); font-weight: 500; }
+
+.hl {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  width: 100%;
+}
+.hl1 { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.hl2 { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.hl3 { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  width: 100%;
+}
+
+.footer {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (max-width: 640px) {
+  .wrap { padding: 32px 16px 60px; }
+  .team-grid { grid-template-columns: 1fr; gap: 12px; }
+  .team-card { display: flex; align-items: center; gap: 16px; text-align: left; }
+  .avatar { margin: 0; flex-shrink: 0; }
+  .item { padding: 14px 16px; }
+  .item-body { padding-left: 28px; }
+  .presenter-banner { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-badge">HACKATHON PRESENTATION BRIEF</div>
+    <h1>시액조제일지 <span>AI 검토 시스템</span></h1>
+    <p class="header-sub">일동제약 해커톤 발표 브리핑 — 역할 및 발표 순서</p>
+  </div>
+
+  <div class="team-grid">
+    <div class="team-card c1">
+      <div class="team-name">태윤</div>
+      <div class="role-tag rt1">오프닝</div>
+      <div class="team-desc">전체 구조 설계<br>기획의도 · 시스템 소개</div>
+    </div>
+    <div class="team-card c2">
+      <div class="team-name">혜원</div>
+      <div class="role-tag rt2">프론트엔드</div>
+      <div class="team-desc">UI 개발 · 디테일<br>도메인 · 반응형</div>
+    </div>
+    <div class="team-card c3">
+      <div class="team-name">하람</div>
+      <div class="role-tag rt3">백엔드 · 클로징</div>
+      <div class="team-desc">MISO · 지식베이스<br>시연 · 기대효과</div>
+    </div>
+  </div>
+
+  <!-- 태윤 -->
+  <div class="section">
+    <div class="section-label" onclick="toggle(this)">
+      <div class="section-icon si1">1</div>
+      <div class="section-title">태윤 — 오프닝</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="presenter-banner">
+        <div class="presenter-info">
+          <div class="presenter-role">전체 구조 설계 · 오프닝 발표</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">1</div>
+          <div class="item-title">기획의도 및 취지 소개</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet">일동제약이 앞으로도 지속적으로 성장하는 만큼, <b>늘어나는 검토 업무를 보다 효율적으로 처리</b>하기 위해 AI를 도입</div>
+          <div class="bullet">단순 반복 검토 업무에 AI를 적용하여 <b>시험자와 검토자 모두의 업무 부담을 절감</b></div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">2</div>
+          <div class="item-title">팀원 소개</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet"><b>태윤</b> — 전체 개발 방향 설정 및 프론트 ↔ AI 연결 총괄</div>
+          <div class="bullet"><b>혜원</b> — 프론트엔드. UI 설계 및 사용자 경험 최적화</div>
+          <div class="bullet"><b>하람</b> — 백엔드. AI(MISO) 워크플로우 및 지식베이스 설계</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">3</div>
+          <div class="item-title">시스템 구조 설명</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet"><b>v0 + Vercel</b> 와 <b>MISO</b>를 이용해서 프론트엔드와 백엔드 구축</div>
+          <div class="bullet">그 외 <b>사용자의 편의</b> 와 <b>직관성</b>을 고려한 기능 추가</div>
+          <div class="hl hl1">해커톤을 준비하면서 Vercel과 MISO 뿐만 아닌 다양한 개발언어 및 AI를 학습하였음을 언급</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 혜원 -->
+  <div class="section">
+    <div class="section-label" onclick="toggle(this)">
+      <div class="section-icon si2">2</div>
+      <div class="section-title">혜원 — 프론트엔드 & 디테일</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="presenter-banner">
+        <div class="presenter-info">
+          <div class="presenter-role">프론트엔드 개발 · UI 디테일 · 발표</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">1</div>
+          <div class="item-title">v0로 UI 초안 생성 + GitHub 연동</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet">AI 기반 UI 생성 도구(v0)로 초안을 빠르게 제작</div>
+          <div class="bullet"><b>웹하드 역할을 하며 수정 및 배포가 용이한 GitHub</b>에 연동하여 효율성 극대화</div>
+          <div class="bullet">v0 수정 시 평균 <b>00분 소요</b> → GitHub 직접 수정 시 <b>00분으로 단축</b></div>
+          <div class="bullet">간단한 수정은 코드를 직접 보고 수정하는 것이 디버깅에 더 빠르다고 판단</div>
+          <div class="todo">⚠ 실제 시간 수치 측정 후 입력 필요</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">2</div>
+          <div class="item-title">UI 디테일 소개</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet"><b>도메인</b> — 누구나 접근하기 쉽도록 직관적인 도메인 설정<br><span style="font-size:13px;color:var(--muted)">예: 시액조제일지.com (연 9천원 수준, 타 팀 대비 차별화 포인트)</span></div>
+          <div class="bullet"><b>반응형 UI</b> — 시험자(태블릿)와 검토자(PC) 각각의 디바이스에 최적화된 레이아웃 설계</div>
+          <div class="bullet"><b>아이콘</b> — 좌측 상단 아이콘 배치로 완성도 높은 프로그램 이미지 구현</div>
+          <div class="hl hl2">차별화 포인트: 도메인 구입은 타 팀이 생각하지 못할 디테일</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하람 -->
+  <div class="section">
+    <div class="section-label" onclick="toggle(this)">
+      <div class="section-icon si3">3</div>
+      <div class="section-title">하람 — 백엔드 & 시연 & 클로징</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="presenter-banner">
+        <div class="presenter-info">
+          <div class="presenter-role">백엔드 · MISO 연동 · 시연 · 클로징 발표</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">1</div>
+          <div class="item-title">프론트엔드 시연</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet">화면을 직접 보여주며 사용자 입력 → AI 응답까지의 흐름 설명</div>
+          <div class="bullet">입력값을 바로 AI에 넘기면 <b>할루시네이션(착란)</b>이 발생할 수 있어, <b>파싱을 먼저 수행</b>함을 기술적으로 언급</div>
+          <div class="hl hl3">기술 포인트: "파싱 로직 구현을 위해 Python을 별도로 학습했습니다"</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">2</div>
+          <div class="item-title">지식베이스 데이터 구성</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet">AI가 검토에 활용하는 <b>DB 구조 설명</b></div>
+          <div class="bullet">일반 사용자는 접근 불가 — <b>관리자 계정만 추가/수정/삭제 가능</b>한 보안 구조 설명</div>
+          <div class="bullet">관리자 기능도 프론트 화면에서 직접 조작 가능하도록 구현</div>
+          <div class="hl hl3">차별화 포인트: 단순 챗봇이 아닌, 실무에 바로 쓸 수 있는 완성형 관리 시스템</div>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div class="item-num">3</div>
+          <div class="item-title">기대효과 및 마무리</div>
+        </div>
+        <div class="item-body">
+          <div class="bullet"><b>업무 시간 단축</b> — 반복 검토 업무의 자동화로 시험자/검토자 업무 효율 향상</div>
+          <div class="bullet"><b>오류 감소</b> — AI 기반 1차 검토로 휴먼에러 사전 방지</div>
+          <div class="bullet"><b>확장 가능성</b> — 시액조제일지 외 다양한 문서 검토에 동일 구조 적용 가능</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>HACKATHON PRESENTATION BRIEF</span>
+  </div>
+
+</div>
+<script>
+function toggle(label) {
+  const body = label.nextElementSibling;
+  const arrow = label.querySelector('.section-toggle');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    arrow.textContent = '▲';
+  } else {
+    body.classList.add('collapsed');
+    arrow.textContent = '▼';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해커톤 연결 공식</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --border: #e9ecef;
+  --border2: #dee2e6;
+  --accent: #0a8f5c;
+  --accent2: #1971c2;
+  --accent3: #e67700;
+  --warn: #c92a2a;
+  --text: #212529;
+  --muted: #868e96;
+  --muted2: #495057;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.header { margin-bottom: 48px; animation: fadeUp 0.6s ease both; }
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(10, 143, 92, 0.07);
+  border: 1px solid rgba(10, 143, 92, 0.2);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.header-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease infinite;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+h1 span { color: var(--accent); }
+
+.header-sub { color: var(--muted2); font-size: 14px; }
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  animation: fadeUp 0.6s ease 0.1s both;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.flow-item {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.flow-item.v0  { background: rgba(25,113,194,0.07); color: var(--accent2); border: 1px solid rgba(25,113,194,0.2); }
+.flow-item.gh  { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+.flow-item.vc  { background: rgba(10,143,92,0.07); color: var(--accent); border: 1px solid rgba(10,143,92,0.2); }
+.flow-item.ms  { background: rgba(230,119,0,0.07); color: var(--accent3); border: 1px solid rgba(230,119,0,0.2); }
+.flow-arrow { color: var(--muted); font-size: 16px; }
+
+.section { margin-bottom: 32px; animation: fadeUp 0.6s ease both; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.section-num.blue  { background: var(--accent2); }
+.section-num.amber { background: var(--accent3); }
+.section-num.warn  { background: var(--warn); }
+
+.section-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; flex: 1; color: var(--text); }
+.section-toggle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.section-body {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.section-body.collapsed { display: none; }
+
+.step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.step:last-child { border-bottom: none; }
+.step:hover { background: var(--surface2); }
+
+.step-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted2);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-content { flex: 1; }
+.step-text { color: var(--text); line-height: 1.6; }
+.step-text b { color: #000; font-weight: 600; }
+.step-sub { margin-top: 4px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.step-sub.warn-text { color: var(--accent3); }
+
+.code-block {
+  margin: 0;
+  padding: 20px;
+  background: #f6f8fa;
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+}
+.code-block pre {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.8;
+  color: #24292e;
+}
+
+.code-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #f6f8fa;
+  border-top: 1px solid var(--border);
+}
+.code-label-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+.copy-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* github syntax */
+.kw  { color: #d73a49; }
+.fn  { color: #6f42c1; }
+.str { color: #032f62; }
+.cm  { color: #6a737d; }
+.nm  { color: #005cc5; }
+
+.warn-box {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(10,143,92,0.05);
+  border-top: 1px solid rgba(10,143,92,0.15);
+}
+.warn-box-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.warn-box-text { font-size: 13px; color: var(--accent); line-height: 1.6; }
+
+.info-box {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(25,113,194,0.04);
+  border-top: 1px solid rgba(25,113,194,0.12);
+}
+.info-box-text { font-size: 13px; color: var(--accent2); line-height: 1.6; }
+
+.caution-list { list-style: none; }
+.caution-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.caution-item:last-child { border-bottom: none; }
+
+.caution-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+  height: fit-content;
+}
+.tag-warn { background: rgba(201,42,42,0.07); color: var(--warn); border: 1px solid rgba(201,42,42,0.2); }
+.tag-tip  { background: rgba(10,143,92,0.07); color: var(--accent); border: 1px solid rgba(10,143,92,0.2); }
+.tag-note { background: rgba(25,113,194,0.07); color: var(--accent2); border: 1px solid rgba(25,113,194,0.2); }
+
+.caution-text { font-size: 13px; color: var(--muted2); line-height: 1.6; }
+.caution-text b { color: var(--text); font-weight: 500; }
+.caution-text code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: #d73a49;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>프론트(Vercel) ↔ 백엔드(MISO) <span>연결 가이드</span></h1>
+    <p class="header-sub">v0 → GitHub → Vercel + MISO AI 연결 전체 프로세스</p>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num">1</div>
+      <div class="section-title">v0에서 프로젝트 생성</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <div class="step-text"><b>v0.dev</b> 접속 → <b>로그인 먼저</b></div>
+          <div class="step-sub warn-text">⚠ 로그인 안 하면 미리보기 안 뜸</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <div class="step-text">프롬프트 입력해서 UI 생성</div>
+          <div class="step-sub">(ex. 간단한 프론트엔드를 만들어줘. 입력창 하나, ai분석시작 이라는 버튼 하나. 이 버튼을 눌렀을때 MISO라는 에이전트의 워크플로우에 값을 전달하는 로직을 만들거야. 해당 로직은 추후 구현예정
+)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num blue">2</div>
+      <div class="section-title">v0 → GitHub 연동 & 배포</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box">
+        <div class="info-box-text">GitHub 레포지토리(코드 저장소)와 연동하면 코드 수정 즉시 자동 배포됨 — v0에서 직접 수정하는 것보다 빠르기 때문에 이 방식을 권장<br>v0로 배포 후 진행하세요</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-content"><div class="step-text">우측 상단 <b>Publish</b> 클릭 → <b>Create Repository</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-content"><div class="step-text"><b>GitHub Sign In</b> (구글 연동)</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <div class="step-text"><b>Username</b> 입력</div>
+          <div class="step-sub">Vercel 계정 유저명 — 프로젝트 URL에 쓰임</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-content"><div class="step-text"><b>Create Account</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">5</div>
+        <div class="step-content"><div class="step-text"><b>Authorize Vercel</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">6</div>
+        <div class="step-content"><div class="step-text"><b>Install Vercel</b> 팝업 뜨면 하단 <b>Install</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">7</div>
+        <div class="step-content"><div class="step-text">Vercel에서 <b>Create Repository</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">8</div>
+        <div class="step-content">
+          <div class="step-text">하단에 <b>GitHub Connected</b> 팝업 뜨면 클릭</div>
+          <div class="step-sub warn-text">→ 팝업 사라지면 github.com 접속해서 레포지토리 확인</div>
+        </div>
+      </div>
+      <div class="warn-box">
+        <div class="warn-box-icon">✓</div>
+        <div class="warn-box-text">여기까지 완료되면 v0 작업물이 GitHub 레포지토리(저장소)에 올라가고 Vercel 자동배포 연결 완료. 이후 GitHub에서 파일을 수정하고 저장하면 Vercel이 자동으로 재배포함</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num amber">3</div>
+      <div class="section-title">MISO 세팅 & API 키 발급</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-content"><div class="step-text"><b>edu.miso.gs</b> 접속 → 로그인 (인증코드 입력)</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-content"><div class="step-text"><b>플레이그라운드</b> → <b>앱 만들기</b> → <b>워크플로우</b> 선택</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <div class="step-text">앱 이름 입력 후 생성</div>
+          <div class="step-sub">예: 시액조제일지검토프로그램</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-content">
+          <div class="step-text"><b>시작 노드</b> 클릭 → 입력변수 <b>변수 추가</b></div>
+          <div class="step-sub">변수 유형: 문단 (100만자까지 가능하기 때문) / 변수 이름: input(다른 값으로 해도됨) / 입력 필드 이름: input(다른 값으로 해도됨) → 확인</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">5</div>
+        <div class="step-content"><div class="step-text"><b>답변 노드</b> 클릭 → 응답 입력란에 <b>/</b> 입력 → 위에서 입력한 변수명인 <b>input</b> 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">6</div>
+        <div class="step-content">
+          <div class="step-text">상단 <b>저장하기</b> → <b>발행하기</b> → <b>발행하기</b> 클릭</div>
+          <div class="step-sub warn-text">→ 발행해야 외부 서비스에서 워크플로우 호출 가능</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">7</div>
+        <div class="step-content"><div class="step-text">우측 상단 <b>로켓 모양 (앱 공유하기)</b> 클릭 → <b>다른 서비스와 연결하기</b> → <b>API 키 생성</b> → <b>확인</b></div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">8</div>
+        <div class="step-content">
+          <div class="step-text"><b>API 서버명</b>, <b>비밀키</b> 복사해두기</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num">4</div>
+      <div class="section-title">GitHub에서 route.ts 생성 (프론트 ↔ MISO 연결 다리)</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box">
+        <div class="info-box-text">route.ts는 프론트(page.tsx)와 MISO API 사이의 연결 다리 역할. v0가 이미 생성해놨다면 새로 만들지 말고 기존 파일을 수정할 것</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-content"><div class="step-text"><b>github.com</b> 접속 → 해당 레포지토리(저장소) 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <div class="step-text"><b>app/api/miso/route.ts</b> 파일이 있는지 확인</div>
+          <div class="step-sub">있으면 → 해당 파일 클릭 후 연필 아이콘으로 수정 / 없으면 → app 폴더 → Add file → Create new file → 파일명에 api/miso/route.ts 입력 (슬래시 치면 폴더 자동 생성)</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <div class="step-text">LLM에 아래 정보를 넘겨서 route.ts 코드 받기⭐</div>
+        </div>
+      </div>
+      <div class="code-label">
+        <span class="code-label-text">LLM에 넘길 정보 목록</span>
+        <button class="copy-btn" onclick="copyCode('code1')">복사</button>
+      </div>
+      <div class="code-block">
+        <pre id="code1">(상황설명하며) route.ts 파일을 만들어줘.
+
+- 엔드포인트: /chat  (⭐ /chat-messages 아님, /workflows/run 아님 주의)
+
+- MISO API URL: 위에서 복사한 값
+- API KEY: app-여기에비밀키입력
+- 입력변수명: input
+- 응답 파싱: res.text() 먼저 받고 JSON.parse() 할 것
+- 응답값: data?.answer
+- response_mode: "blocking"
+- conversation_id: ""
+- user: "user"
+
+주의: ⭐ 명세서에 mode라고 나와있어도 실제 파라미터는 response_mode임(명세서가 잘못되어있음)</pre>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-content">
+          <div class="step-text">받은 코드를 GitHub 파일에 붙여넣기</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">5</div>
+        <div class="step-content">
+          <div class="step-text"><b>Commit changes</b> 클릭 → <b>Commit changes</b> 클릭</div>
+          <div class="step-sub">또는 Ctrl+S</div>
+        </div>
+      </div>
+      <div class="warn-box">
+        <div class="warn-box-icon">✓</div>
+        <div class="warn-box-text">커밋하면 Vercel이 자동 재배포됨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num blue">5</div>
+      <div class="section-title">page.tsx 수정 (MISO 응답 화면에 표시)</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-content"><div class="step-text">GitHub 레포지토리에서 <b>app/page.tsx</b> 열기 → 연필 아이콘 클릭</div></div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <div class="step-text">코드 전체 복사 후 LLM에 아래처럼 요청</div>
+        </div>
+      </div>
+      <div class="code-label">
+        <span class="code-label-text">LLM 요청 프롬프트</span>
+        <button class="copy-btn" onclick="copyCode('code2')">복사</button>
+      </div>
+      <div class="code-block">
+        <pre id="code2">아래는 내 page.tsx야.
+miso로 요청을 보내고 응답을 화면에 표시하도록 수정해줘.
+전달 변수명은 input이야.
+
+[page.tsx 코드 붙여넣기]</pre>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-content"><div class="step-text">받은 코드로 기존 코드 전체 교체 후 <b>Commit changes</b></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>HACKATHON CHEATSHEET v1.0</span>
+    <span>v0 + GitHub + Vercel + MISO</span>
+  </div>
+
+</div>
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.section-toggle');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    arrow.textContent = '▲';
+  } else {
+    body.classList.add('collapsed');
+    arrow.textContent = '▼';
+  }
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(`.copy-btn[onclick="copyCode('${id}')"]`);
+    if (btn) {
+      btn.textContent = '완료!';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 1500);
+    }
+  });
+}
+</script>
+</body>
+</html>
