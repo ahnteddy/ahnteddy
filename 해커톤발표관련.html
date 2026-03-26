@@ -35,6 +35,10 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   background:
     radial-gradient(circle at top left, #e0ecff 0%, transparent 28%),
@@ -44,6 +48,8 @@ body {
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .wrap {
@@ -112,7 +118,7 @@ body {
   border: 1px solid var(--border2);
   border-radius: 18px;
   padding: 22px 18px;
-  text-align: center;
+  text-align: left;
   box-shadow: var(--shadow);
   backdrop-filter: blur(8px);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -127,27 +133,11 @@ body {
 .team-card.c2 { border-color: rgba(37,99,235,0.35); }
 .team-card.c3 { border-color: rgba(234,138,18,0.35); }
 
-.avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 800;
-  margin: 0 auto 12px;
-  color: #fff;
-}
-
-.av1 { background: linear-gradient(135deg, #10b981, #0f9f6e); }
-.av2 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.av3 { background: linear-gradient(135deg, #f59e0b, #ea8a12); }
-
 .team-name {
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 6px;
+  line-height: 1.3;
 }
 
 .role-tag {
@@ -166,7 +156,7 @@ body {
 .team-desc {
   font-size: 13px;
   color: var(--muted2);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .section {
@@ -210,12 +200,15 @@ body {
   font-weight: 800;
   flex: 1;
   letter-spacing: -0.02em;
+  line-height: 1.35;
+  min-width: 0;
 }
 
 .section-toggle {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .section-body {
@@ -240,14 +233,10 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.presenter-name {
-  font-size: 14px;
-  font-weight: 700;
-}
-
 .presenter-role {
   font-size: 13px;
   color: var(--muted2);
+  line-height: 1.5;
 }
 
 .item {
@@ -287,6 +276,7 @@ body {
   font-weight: 800;
   flex: 1;
   line-height: 1.45;
+  min-width: 0;
 }
 
 .item-body {
@@ -300,7 +290,9 @@ body {
   padding: 4px 0;
   font-size: 14px;
   color: var(--muted2);
-  line-height: 1.7;
+  line-height: 1.75;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .bullet::before {
@@ -324,8 +316,10 @@ body {
   padding: 12px 14px;
   border-radius: 12px;
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.7;
   width: 100%;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .hl1 { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
@@ -344,6 +338,8 @@ body {
   border: 1px solid #f7cf5e;
   color: #8a6400;
   width: 100%;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .footer {
@@ -356,6 +352,7 @@ body {
   color: var(--muted);
   font-family: var(--mono);
   font-size: 11px;
+  gap: 12px;
 }
 
 @keyframes fadeUp {
@@ -368,7 +365,6 @@ body {
   50% { opacity: 0.35; }
 }
 
-/* 태블릿 */
 @media (max-width: 900px) {
   .wrap {
     padding: 30px 16px 56px;
@@ -379,20 +375,10 @@ body {
   }
 
   .team-card {
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px;
-  }
-
-  .avatar {
-    margin: 0;
-    flex-shrink: 0;
+    padding: 18px 16px;
   }
 }
 
-/* 모바일 */
 @media (max-width: 640px) {
   body {
     font-size: 14px;
@@ -411,18 +397,21 @@ body {
     font-size: 10px;
     padding: 5px 11px;
     margin-bottom: 14px;
+    max-width: 100%;
   }
 
   .header h1 {
     font-size: 25px;
     line-height: 1.32;
     margin-bottom: 8px;
+    word-break: keep-all;
   }
 
   .header-sub {
     font-size: 13px;
     line-height: 1.55;
     padding: 0 6px;
+    word-break: keep-all;
   }
 
   .team-grid {
@@ -431,31 +420,24 @@ body {
   }
 
   .team-card {
-    padding: 15px;
+    padding: 16px 14px;
     border-radius: 16px;
-    gap: 12px;
-  }
-
-  .avatar {
-    width: 46px;
-    height: 46px;
-    font-size: 16px;
   }
 
   .team-name {
     font-size: 16px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
 
   .role-tag {
     font-size: 10px;
     padding: 3px 8px;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
   }
 
   .team-desc {
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.55;
   }
 
   .section {
@@ -494,7 +476,8 @@ body {
 
   .presenter-role {
     font-size: 12px;
-    line-height: 1.45;
+    line-height: 1.5;
+    word-break: keep-all;
   }
 
   .item {
@@ -503,7 +486,7 @@ body {
 
   .item-header {
     gap: 10px;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
   }
 
   .item-num {
@@ -525,14 +508,14 @@ body {
 
   .bullet {
     font-size: 13px;
-    line-height: 1.62;
-    padding: 4px 0;
+    line-height: 1.7;
+    display: flex;
   }
 
   .hl,
   .todo {
     font-size: 12px;
-    line-height: 1.58;
+    line-height: 1.65;
     margin-top: 10px;
     padding: 10px 11px;
     border-radius: 10px;
@@ -542,7 +525,6 @@ body {
     margin-top: 28px;
     padding-top: 16px;
     font-size: 10px;
-    gap: 10px;
     flex-direction: column;
     align-items: flex-start;
   }
@@ -560,32 +542,22 @@ body {
 
   <div class="team-grid">
     <div class="team-card c1">
-      <div class="avatar av1">T</div>
-      <div>
-        <div class="team-name">태윤</div>
-        <div class="role-tag rt1">오프닝</div>
-        <div class="team-desc">전체 구조 설계<br>기획의도 · 시스템 소개</div>
-      </div>
+      <div class="team-name">태윤</div>
+      <div class="role-tag rt1">오프닝</div>
+      <div class="team-desc">전체 구조 설계<br>기획의도 · 시스템 소개</div>
     </div>
     <div class="team-card c2">
-      <div class="avatar av2">H</div>
-      <div>
-        <div class="team-name">혜원</div>
-        <div class="role-tag rt2">프론트엔드</div>
-        <div class="team-desc">UI 개발 · 디테일<br>도메인 · 반응형</div>
-      </div>
+      <div class="team-name">혜원</div>
+      <div class="role-tag rt2">프론트엔드</div>
+      <div class="team-desc">UI 개발 · 디테일<br>도메인 · 반응형</div>
     </div>
     <div class="team-card c3">
-      <div class="avatar av3">H</div>
-      <div>
-        <div class="team-name">하람</div>
-        <div class="role-tag rt3">백엔드 · 클로징</div>
-        <div class="team-desc">MISO · 지식베이스<br>시연 · 기대효과</div>
-      </div>
+      <div class="team-name">하람</div>
+      <div class="role-tag rt3">백엔드 · 클로징</div>
+      <div class="team-desc">MISO · 지식베이스<br>시연 · 기대효과</div>
     </div>
   </div>
 
-  <!-- 태윤 -->
   <div class="section">
     <div class="section-label" onclick="toggle(this)">
       <div class="section-icon si1">1</div>
@@ -594,9 +566,7 @@ body {
     </div>
     <div class="section-body">
       <div class="presenter-banner">
-        <div class="presenter-info">
-          <div class="presenter-role">전체 구조 설계 · 오프닝 발표</div>
-        </div>
+        <div class="presenter-role">전체 구조 설계 · 오프닝 발표</div>
       </div>
 
       <div class="item">
@@ -636,7 +606,6 @@ body {
     </div>
   </div>
 
-  <!-- 혜원 -->
   <div class="section">
     <div class="section-label" onclick="toggle(this)">
       <div class="section-icon si2">2</div>
@@ -645,9 +614,7 @@ body {
     </div>
     <div class="section-body">
       <div class="presenter-banner">
-        <div class="presenter-info">
-          <div class="presenter-role">프론트엔드 개발 · UI 디테일 · 발표</div>
-        </div>
+        <div class="presenter-role">프론트엔드 개발 · UI 디테일 · 발표</div>
       </div>
 
       <div class="item">
@@ -670,7 +637,7 @@ body {
           <div class="item-title">UI 디테일 소개</div>
         </div>
         <div class="item-body">
-          <div class="bullet"><b>도메인</b> — 누구나 접근하기 쉽도록 직관적인 도메인 설정<br><span style="font-size:13px;color:var(--muted)">예: 시액조제일지.com (연 9천원 수준, 타 팀 대비 차별화 포인트)</span></div>
+          <div class="bullet"><b>도메인</b> — 누구나 접근하기 쉽도록 직관적인 도메인 설정</div>
           <div class="bullet"><b>반응형 UI</b> — 시험자(태블릿)와 검토자(PC) 각각의 디바이스에 최적화된 레이아웃 설계</div>
           <div class="bullet"><b>아이콘</b> — 좌측 상단 아이콘 배치로 완성도 높은 프로그램 이미지 구현</div>
           <div class="hl hl2">차별화 포인트: 도메인 구입은 타 팀이 생각하지 못할 디테일</div>
@@ -679,7 +646,6 @@ body {
     </div>
   </div>
 
-  <!-- 하람 -->
   <div class="section">
     <div class="section-label" onclick="toggle(this)">
       <div class="section-icon si3">3</div>
@@ -688,9 +654,7 @@ body {
     </div>
     <div class="section-body">
       <div class="presenter-banner">
-        <div class="presenter-info">
-          <div class="presenter-role">백엔드 · MISO 연동 · 시연 · 클로징 발표</div>
-        </div>
+        <div class="presenter-role">백엔드 · MISO 연동 · 시연 · 클로징 발표</div>
       </div>
 
       <div class="item">
@@ -701,7 +665,7 @@ body {
         <div class="item-body">
           <div class="bullet">화면을 직접 보여주며 사용자 입력 → AI 응답까지의 흐름 설명</div>
           <div class="bullet">입력값을 바로 AI에 넘기면 <b>할루시네이션(착란)</b>이 발생할 수 있어, <b>파싱을 먼저 수행</b>함을 기술적으로 언급</div>
-          <div class="hl hl3">기술 포인트: "파싱 로직 구현을 위해 Python을 별도로 학습했습니다"</div>
+          <div class="hl hl3">기술 포인트: 파싱 로직 구현을 위해 Python을 별도로 학습했습니다</div>
         </div>
       </div>
 
@@ -734,7 +698,7 @@ body {
 
   <div class="footer">
     <span>HACKATHON PRESENTATION BRIEF</span>
-    <span>MOBILE READY</span>
+    <span>MOBILE FIXED</span>
   </div>
 
 </div>
