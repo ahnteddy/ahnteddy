@@ -13,26 +13,15 @@ body {
   min-height: 100vh;
   padding: 40px 20px;
 }
-.wrap {
-  max-width: 860px;
-  margin: 0 auto;
-}
-h1 {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 20px;
-  text-align: center;
-}
-.btn-group {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+.wrap { max-width: 860px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 800; margin-bottom: 20px; text-align: center; }
+
+.btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
 button {
   flex: 1;
-  padding: 14px;
+  padding: 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   font-family: 'Noto Sans KR', sans-serif;
@@ -40,10 +29,10 @@ button {
   transition: background 0.2s;
   color: #fff;
 }
-.btn-docs  { background: #0a8f5c; }
-.btn-docs:hover  { background: #087a4f; }
-.btn-chunks { background: #1971c2; }
-.btn-chunks:hover { background: #155fa0; }
+.btn-load   { background: #1971c2; }
+.btn-load:hover   { background: #155fa0; }
+.btn-add    { background: #0a8f5c; }
+.btn-add:hover    { background: #087a4f; }
 
 #result {
   background: #fff;
@@ -51,54 +40,97 @@ button {
   padding: 20px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   min-height: 100px;
-  color: #333;
-  font-size: 14px;
 }
+.placeholder { text-align: center; color: #aaa; padding: 30px 0; font-size: 14px; }
 
-.placeholder {
-  text-align: center;
-  color: #aaa;
-  padding: 30px 0;
-}
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { background: #f1f5f9; }
+th, td { padding: 10px 14px; border-bottom: 1px solid #e9ecef; text-align: left; }
+th { font-weight: 700; color: #444; }
+tr:hover td { background: #f8fafc; }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-thead tr {
-  background: #f1f5f9;
-}
-th, td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #e9ecef;
-  text-align: left;
-}
-th {
-  font-weight: 700;
-  color: #444;
-}
-tr:hover td {
-  background: #f8fafc;
-}
-
-.raw-box {
-  white-space: pre-wrap;
-  word-break: break-all;
+.action-btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
   font-size: 12px;
-  color: #555;
-  line-height: 1.7;
+  font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  color: #fff;
+  flex: unset;
+  margin-right: 6px;
 }
+.btn-edit   { background: #e67700; }
+.btn-edit:hover   { background: #c96300; }
+.btn-delete { background: #c92a2a; }
+.btn-delete:hover { background: #a52020; }
+
+/* 모달 */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+.modal h2 { font-size: 17px; font-weight: 800; margin-bottom: 16px; }
+.modal label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #444; }
+.modal input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  margin-bottom: 14px;
+  outline: none;
+}
+.modal input:focus { border-color: #1971c2; }
+.modal-btns { display: flex; gap: 10px; margin-top: 4px; }
+.modal-btns button { flex: 1; padding: 11px; border-radius: 8px; }
+.btn-confirm { background: #1971c2; }
+.btn-confirm:hover { background: #155fa0; }
+.btn-cancel  { background: #868e96; }
+.btn-cancel:hover  { background: #6c757d; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🗂️ 지식베이스 문서 조회 테스트</h1>
+  <h1>🗂️ 지식베이스 관리</h1>
   <div class="btn-group">
-    <button class="btn-docs" onclick="fetchDocs()">📄 문서 목록</button>
-    <button class="btn-chunks" onclick="fetchChunks()">🔍 실제 내용 (표로 보기)</button>
+    <button class="btn-load" onclick="fetchChunks()">🔍 전체 불러오기</button>
+    <button class="btn-add"  onclick="openAdd()">➕ 추가</button>
   </div>
   <div id="result"><div class="placeholder">버튼을 누르면 결과가 여기 표시됩니다.</div></div>
+</div>
+
+<!-- 추가/수정 모달 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">사용자 추가</h2>
+    <label>사번</label>
+    <input id="f-sabun" placeholder="예: 219999" />
+    <label>사용자명</label>
+    <input id="f-name" placeholder="예: 홍길동" />
+    <label>이니셜</label>
+    <input id="f-initial" placeholder="예: HGD" />
+    <div class="modal-btns">
+      <button class="btn-confirm" onclick="confirmModal()">✅ 확인</button>
+      <button class="btn-cancel"  onclick="closeModal()">취소</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -107,41 +139,20 @@ const DATASET_ID = 'e1274e4d-eb18-47fe-9659-5bf13eed979c';
 const DOC_ID     = 'a4898385-2877-4e1c-bb20-7a58885d45b2';
 const BASE_URL   = 'https://api.holdings.miso.gs/ext/v1';
 
-async function fetchDocs() {
-  document.getElementById('result').innerHTML = '<div class="placeholder">불러오는 중...</div>';
-  try {
-    const res  = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs`, {
-      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
-    });
-    const data = await res.json();
-    document.getElementById('result').innerHTML = `<div class="raw-box">${JSON.stringify(data, null, 2)}</div>`;
-  } catch (e) {
-    document.getElementById('result').innerHTML = '오류: ' + e.message;
-  }
-}
+let allRows = [];      // { sabun, name, initial, segmentId }
+let editSegId = null;  // 수정 중인 segment id
+let mode = 'add';
 
+/* ───── 전체 불러오기 ───── */
 async function fetchChunks() {
   document.getElementById('result').innerHTML = '<div class="placeholder">불러오는 중...</div>';
   try {
     const res  = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments`, {
-      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': `Bearer ${API_KEY}` }
     });
     const data = await res.json();
-    const rows = parseChunks(data.data || []);
-
-    if (rows.length === 0) {
-      document.getElementById('result').innerHTML = '<div class="placeholder">데이터가 없습니다.</div>';
-      return;
-    }
-
-    const headers = Object.keys(rows[0]);
-    let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-    rows.forEach(row => {
-      html += '<tr>' + headers.map(h => `<td>${row[h] ?? ''}</td>`).join('') + '</tr>';
-    });
-    html += '</tbody></table>';
-    document.getElementById('result').innerHTML = html;
-
+    allRows = parseChunks(data.data || []);
+    renderTable();
   } catch (e) {
     document.getElementById('result').innerHTML = '오류: ' + e.message;
   }
@@ -150,11 +161,8 @@ async function fetchChunks() {
 function parseChunks(chunks) {
   const seen = new Set();
   const rows = [];
-
   chunks.forEach(chunk => {
-    const content = chunk.content || '';
-    // 각 줄을 분리 (공백 기준)
-    const entries = content.split(/(?="사번")/).filter(s => s.trim());
+    const entries = chunk.content.split(/(?="사번")/).filter(s => s.trim());
     entries.forEach(entry => {
       const obj = {};
       const pairs = entry.match(/"([^"]+)":"([^"]*)"/g) || [];
@@ -164,12 +172,116 @@ function parseChunks(chunks) {
       });
       if (obj['사번'] && !seen.has(obj['사번'])) {
         seen.add(obj['사번']);
-        rows.push(obj);
+        rows.push({ sabun: obj['사번'], name: obj['사용자명'], initial: obj['이니셜'], segmentId: chunk.id });
       }
     });
   });
-
   return rows;
+}
+
+function renderTable() {
+  if (allRows.length === 0) {
+    document.getElementById('result').innerHTML = '<div class="placeholder">데이터가 없습니다.</div>';
+    return;
+  }
+  let html = `<table><thead><tr><th>사번</th><th>사용자명</th><th>이니셜</th><th>관리</th></tr></thead><tbody>`;
+  allRows.forEach(row => {
+    html += `<tr>
+      <td>${row.sabun}</td>
+      <td>${row.name}</td>
+      <td>${row.initial}</td>
+      <td>
+        <button class="action-btn btn-edit"   onclick="openEdit('${row.segmentId}','${row.sabun}','${row.name}','${row.initial}')">수정</button>
+        <button class="action-btn btn-delete" onclick="deleteSegment('${row.segmentId}')">삭제</button>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('result').innerHTML = html;
+}
+
+/* ───── 추가 ───── */
+function openAdd() {
+  mode = 'add';
+  editSegId = null;
+  document.getElementById('modal-title').textContent = '사용자 추가';
+  document.getElementById('f-sabun').value = '';
+  document.getElementById('f-name').value  = '';
+  document.getElementById('f-initial').value = '';
+  document.getElementById('modal').classList.add('show');
+}
+
+async function addSegment(sabun, name, initial) {
+  const content = `"사번":"${sabun}";"사용자명":"${name}";"이니셜":"${initial}"`;
+  const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ segments: [{ content, answer: '', keywords: [] }] })
+  });
+  return res.ok;
+}
+
+/* ───── 수정 ───── */
+function openEdit(segId, sabun, name, initial) {
+  mode = 'edit';
+  editSegId = segId;
+  document.getElementById('modal-title').textContent = '사용자 수정';
+  document.getElementById('f-sabun').value   = sabun;
+  document.getElementById('f-name').value    = name;
+  document.getElementById('f-initial').value = initial;
+  document.getElementById('modal').classList.add('show');
+}
+
+async function editSegment(segId, sabun, name, initial) {
+  const content = `"사번":"${sabun}";"사용자명":"${name}";"이니셜":"${initial}"`;
+  const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments/${segId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ segment: { content, answer: '', keywords: [], enabled: true } })
+  });
+  return res.ok;
+}
+
+/* ───── 삭제 ───── */
+async function deleteSegment(segId) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments/${segId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${API_KEY}` }
+  });
+  if (res.ok) {
+    alert('삭제되었습니다.');
+    fetchChunks();
+  } else {
+    alert('삭제 실패');
+  }
+}
+
+/* ───── 모달 확인 ───── */
+async function confirmModal() {
+  const sabun   = document.getElementById('f-sabun').value.trim();
+  const name    = document.getElementById('f-name').value.trim();
+  const initial = document.getElementById('f-initial').value.trim();
+  if (!sabun || !name || !initial) { alert('모든 항목을 입력해주세요.'); return; }
+
+  let ok = false;
+  if (mode === 'add') {
+    ok = await addSegment(sabun, name, initial);
+  } else {
+    ok = await editSegment(editSegId, sabun, name, initial);
+  }
+
+  if (ok) {
+    alert(mode === 'add' ? '추가되었습니다.' : '수정되었습니다.');
+    closeModal();
+    fetchChunks();
+  } else {
+    alert('처리 실패');
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
 }
 </script>
 </body>
