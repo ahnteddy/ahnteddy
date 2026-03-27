@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지식베이스 문서조회 테스트</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: linear-gradient(135deg, #e0f2fe, #dcfce7);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+.wrap {
+  max-width: 800px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: center;
+}
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #0a8f5c;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+button:hover { background: #087a4f; }
+#result {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 100px;
+  color: #333;
+  line-height: 1.7;
+}
+.status {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗂️ 지식베이스 문서 조회 테스트</h1>
+  <button onclick="fetchDocs()">전체 문서 불러오기</button>
+  <div id="result"><span class="status">버튼을 누르면 결과가 여기 표시됩니다.</span></div>
+</div>
+
+<script>
+const API_KEY = 'ds-2lS0xVnLtWujpjP1wxk9VNXg';
+const DATASET_ID = 'e1274e4d-eb18-47fe-9659-5bf13eed979c';
+const BASE_URL = 'https://api.holdings.miso.gs/ext/v1';
+
+async function fetchDocs() {
+  document.getElementById('result').textContent = '불러오는 중...';
+  try {
+    const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+      }
+    });
+    const data = await res.json();
+    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    document.getElementById('result').textContent = '오류: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
