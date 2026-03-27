@@ -14,7 +14,7 @@ body {
   padding: 40px 20px;
 }
 .wrap {
-  max-width: 800px;
+  max-width: 860px;
   margin: 0 auto;
 }
 h1 {
@@ -25,36 +25,68 @@ h1 {
 }
 .btn-group {
   display: flex;
-  flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
 }
 button {
-  width: 100%;
+  flex: 1;
   padding: 14px;
   border: none;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   font-family: 'Noto Sans KR', sans-serif;
   cursor: pointer;
   transition: background 0.2s;
   color: #fff;
 }
-.btn-docs { background: #0a8f5c; }
-.btn-docs:hover { background: #087a4f; }
+.btn-docs  { background: #0a8f5c; }
+.btn-docs:hover  { background: #087a4f; }
 .btn-chunks { background: #1971c2; }
 .btn-chunks:hover { background: #155fa0; }
+
 #result {
   background: #fff;
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  font-size: 13px;
-  white-space: pre-wrap;
-  word-break: break-all;
   min-height: 100px;
   color: #333;
+  font-size: 14px;
+}
+
+.placeholder {
+  text-align: center;
+  color: #aaa;
+  padding: 30px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+thead tr {
+  background: #f1f5f9;
+}
+th, td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e9ecef;
+  text-align: left;
+}
+th {
+  font-weight: 700;
+  color: #444;
+}
+tr:hover td {
+  background: #f8fafc;
+}
+
+.raw-box {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 12px;
+  color: #555;
   line-height: 1.7;
 }
 </style>
@@ -63,50 +95,81 @@ button {
 <div class="wrap">
   <h1>🗂️ 지식베이스 문서 조회 테스트</h1>
   <div class="btn-group">
-    <button class="btn-docs" onclick="fetchDocs()">📄 전체 문서 목록 불러오기</button>
-    <button class="btn-chunks" onclick="fetchChunks()">🔍 실제 내용(청크) 불러오기</button>
+    <button class="btn-docs" onclick="fetchDocs()">📄 문서 목록</button>
+    <button class="btn-chunks" onclick="fetchChunks()">🔍 실제 내용 (표로 보기)</button>
   </div>
-  <div id="result">버튼을 누르면 결과가 여기 표시됩니다.</div>
+  <div id="result"><div class="placeholder">버튼을 누르면 결과가 여기 표시됩니다.</div></div>
 </div>
 
 <script>
-const API_KEY = 'ds-2lS0xVnLtWujpjP1wxk9VNXg';
+const API_KEY    = 'ds-2lS0xVnLtWujpjP1wxk9VNXg';
 const DATASET_ID = 'e1274e4d-eb18-47fe-9659-5bf13eed979c';
-const DOC_ID = 'a4898385-2877-4e1c-bb20-7a58885d45b2';
-const BASE_URL = 'https://api.holdings.miso.gs/ext/v1';
+const DOC_ID     = 'a4898385-2877-4e1c-bb20-7a58885d45b2';
+const BASE_URL   = 'https://api.holdings.miso.gs/ext/v1';
 
 async function fetchDocs() {
-  document.getElementById('result').textContent = '불러오는 중...';
+  document.getElementById('result').innerHTML = '<div class="placeholder">불러오는 중...</div>';
   try {
-    const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-      }
+    const res  = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs`, {
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
     });
     const data = await res.json();
-    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    document.getElementById('result').innerHTML = `<div class="raw-box">${JSON.stringify(data, null, 2)}</div>`;
   } catch (e) {
-    document.getElementById('result').textContent = '오류: ' + e.message;
+    document.getElementById('result').innerHTML = '오류: ' + e.message;
   }
 }
 
 async function fetchChunks() {
-  document.getElementById('result').textContent = '불러오는 중...';
+  document.getElementById('result').innerHTML = '<div class="placeholder">불러오는 중...</div>';
   try {
-    const res = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-      }
+    const res  = await fetch(`${BASE_URL}/datasets/${DATASET_ID}/docs/${DOC_ID}/segments`, {
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
     });
     const data = await res.json();
-    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    const rows = parseChunks(data.data || []);
+
+    if (rows.length === 0) {
+      document.getElementById('result').innerHTML = '<div class="placeholder">데이터가 없습니다.</div>';
+      return;
+    }
+
+    const headers = Object.keys(rows[0]);
+    let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+    rows.forEach(row => {
+      html += '<tr>' + headers.map(h => `<td>${row[h] ?? ''}</td>`).join('') + '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('result').innerHTML = html;
+
   } catch (e) {
-    document.getElementById('result').textContent = '오류: ' + e.message;
+    document.getElementById('result').innerHTML = '오류: ' + e.message;
   }
+}
+
+function parseChunks(chunks) {
+  const seen = new Set();
+  const rows = [];
+
+  chunks.forEach(chunk => {
+    const content = chunk.content || '';
+    // 각 줄을 분리 (공백 기준)
+    const entries = content.split(/(?="사번")/).filter(s => s.trim());
+    entries.forEach(entry => {
+      const obj = {};
+      const pairs = entry.match(/"([^"]+)":"([^"]*)"/g) || [];
+      pairs.forEach(pair => {
+        const m = pair.match(/"([^"]+)":"([^"]*)"/);
+        if (m) obj[m[1]] = m[2];
+      });
+      if (obj['사번'] && !seen.has(obj['사번'])) {
+        seen.add(obj['사번']);
+        rows.push(obj);
+      }
+    });
+  });
+
+  return rows;
 }
 </script>
 </body>
