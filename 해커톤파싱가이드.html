@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2단계: 파싱 가이드</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --text: #1e293b;
+  --muted: #94a3b8;
+  --muted2: #475569;
+  --green: #059669;
+  --blue: #2563eb;
+  --amber: #d97706;
+  --red: #dc2626;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.7; min-height: 100vh; }
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav-home { font-size: 13px; color: var(--muted2); text-decoration: none; font-weight: 600; transition: color 0.15s; }
+.nav-home:hover { color: var(--blue); }
+.nav-steps { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.nav-step { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 99px; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+.nav-step.active { background: linear-gradient(135deg, #059669, #10b981); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.3); }
+.nav-step.inactive { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+.nav-step.inactive:hover { background: var(--border); color: var(--text); }
+.nav-prev { font-size: 13px; font-weight: 700; color: var(--muted2); text-decoration: none; transition: color 0.15s; }
+.nav-prev:hover { color: var(--text); }
+
+.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+.header { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--green); background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.2);
+  border-radius: 4px; padding: 4px 10px; margin-bottom: 14px; letter-spacing: 0.05em;
+}
+.header-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+h1 span { background: linear-gradient(135deg, #059669, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-sub { color: var(--muted2); font-size: 14px; }
+
+.why-box {
+  background: rgba(5,150,105,0.06); border: 1px solid rgba(5,150,105,0.2);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 36px;
+  font-size: 14px; color: #065f46; line-height: 1.8;
+  animation: fadeUp 0.5s ease 0.05s both;
+  box-shadow: 0 2px 12px rgba(5,150,105,0.08);
+}
+.why-box b { font-weight: 700; }
+
+.section { margin-bottom: 28px; animation: fadeUp 0.5s ease both; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+.section:nth-child(6) { animation-delay: 0.25s; }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sn-green  { background: linear-gradient(135deg, #059669, #10b981); }
+.sn-blue   { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.sn-amber  { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.sn-red    { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.section-title { font-size: 16px; font-weight: 700; flex: 1; }
+.section-toggle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.section-body { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.section-body.collapsed { display: none; }
+
+.item { padding: 13px 20px; border-bottom: 1px solid var(--border); }
+.item:last-child { border-bottom: none; }
+.item-row { display: flex; align-items: flex-start; gap: 10px; }
+.item-dot { width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #059669, #2563eb); flex-shrink: 0; margin-top: 8px; }
+.item-text { font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
+.item-text b { color: #0f172a; font-weight: 700; }
+
+code { font-family: var(--mono); font-size: 12px; background: #f1f5f9; padding: 1px 6px; border-radius: 3px; color: var(--red); border: 1px solid var(--border2); }
+
+.hl { margin-top: 8px; padding: 9px 14px; border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.hl-green { background: rgba(5,150,105,0.07);  color: #065f46; border: 1px solid rgba(5,150,105,0.2); }
+.hl-blue  { background: rgba(37,99,235,0.07);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.2); }
+.hl-amber { background: rgba(217,119,6,0.07);  color: #92400e; border: 1px solid rgba(217,119,6,0.2); }
+
+.warn-box { padding: 12px 20px; background: rgba(217,119,6,0.06); border-top: 1px solid rgba(217,119,6,0.2); font-size: 13px; color: #92400e; line-height: 1.6; }
+
+.code-label { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #f8fafc; border-top: 1px solid var(--border); }
+.code-label-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.copy-btn { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border2); border-radius: 4px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; }
+.copy-btn:hover { color: var(--green); border-color: var(--green); }
+
+.code-block { padding: 18px 20px; background: #f8fafc; overflow-x: auto; border-top: 1px solid var(--border); }
+.code-block pre { font-family: var(--mono); font-size: 12px; line-height: 1.9; color: #1e293b; white-space: pre-wrap; }
+
+.footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-prev" href="해커톤스킬(프론트백연결).html">← 이전</a>
+  <div class="nav-steps">
+    <a class="nav-step inactive" href="해커톤스킬(프론트백연결).html">1단계: 프론트-백 연결</a>
+    <a class="nav-step active" href="해커톤파싱가이드.html">2단계: 파싱 가이드</a>
+  </div>
+  <a class="nav-home" href="index.html">메뉴 →</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-badge">STEP 2 · HACKATHON CHEATSHEET</div>
+    <h1>시액조제일지 <span>파싱 가이드</span></h1>
+    <p class="header-sub">프론트단에서 파싱 후 MISO로 전달하는 프로세스</p>
+  </div>
+
+  <div class="why-box">
+    <b>왜 프론트에서 파싱하나요?</b><br>
+    MISO API를 호출하기 전(네트워크 전) 단계에서 파싱하므로 속도가 더 빠릅니다.<br>
+    전체 원문 데이터 대신 파싱된 구조화 데이터를 넘기면 AI 응답 품질도 올라갑니다.
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-green">1</div>
+      <div class="section-title">LLM에 요청할 때 전달할 것</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>page.tsx</b> 와 <b>route.ts</b> 파일만 넘겨주면 됩니다</div></div>
+        <div class="hl hl-green">MISO API 가이드는 넘기지 않아도 됩니다. 파싱은 MISO 호출 이전 단계이므로 불필요합니다. 속도가 느리다면 다른 채팅방을 쓰세요.</div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">파일이 길 경우 하나씩 따로 붙여넣고 <code>"이해만 하고 있어. 대답은 안해도 돼"</code> 라고 해도 됩니다</div></div>
+      </div>
+      <div class="code-label">
+        <span class="code-label-text">LLM 요청 프롬프트 예시</span>
+        <button class="copy-btn" onclick="copyCode('prompt1')">복사</button>
+      </div>
+      <div class="code-block">
+        <pre id="prompt1">아래는 내 page.tsx와 route.ts야.
+백엔드로 던지기 전, 프론트 단계에서 시액조제일지 텍스트를 파싱해줘.
+
+조건:
+1. 파싱 결과를 JSON 형태로 구성할 것
+2. 카드 형식으로 목록 표시할 것
+3. 카드에는 시액명 + 시액조제번호만 표시
+4. 카드 클릭 시 상세 데이터를 시각화할 것
+5. 유효기한은 조제일로부터 며칠인지 함께 표시할 것
+6. 올바른 형식이 아니면 alert으로 안내할 것
+
+[page.tsx 붙여넣기]
+[route.ts 붙여넣기]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-blue">2</div>
+      <div class="section-title">파싱 구조 알려주는 방법</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">실제 시액조제일지 예시 텍스트를 LLM에 붙여넣고, 어떻게 파싱하고 싶은지 설명합니다</div></div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">한 번에 모든 조건을 줄 필요 없습니다. <b>하나씩 쌓아가는 방식</b>으로 진행하면 됩니다</div></div>
+        <div class="hl hl-blue">예: "시험자랑 시액명만 먼저 파싱해줘" → 확인 → "이제 유효기한도 추가해줘"</div>
+      </div>
+      <div class="warn-box">⚠ 파싱 후 반드시 디버깅(console.log)으로 JSON이 올바르게 나오는지 확인할 것. 파싱이 어긋나면 MISO 응답도 틀려집니다.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-amber">3</div>
+      <div class="section-title">카드 UI 구성</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>붙여넣기 1회 = 카드 1장</b> 추가 / 카드 우측 삭제 버튼 / textarea에서 Ctrl+Enter로 직접 입력 등록</div></div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">카드에 표시되는 문구 — <b>시액명 + 시액조제번호</b></div></div>
+        <div class="hl hl-amber">예: 0.005M 수산화나트륨 메탄올 용액 (HWS-60327-03)</div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">카드 클릭 시 → <b>모달</b>로 상세 정보 표시</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-blue">4</div>
+      <div class="section-title">모달 상세 정보</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">시액명, 시액조제번호, 시험자, 조제일, 유효기한</div></div>
+        <div class="hl hl-amber">유효기한 표시 예: 2026-06-26 (조제 후 91일)</div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">조제 내역 테이블 컬럼</div></div>
+        <div class="hl hl-blue"># &nbsp;/&nbsp; 지시문 &nbsp;/&nbsp; 기록값 &nbsp;/&nbsp; 물질정보 &nbsp;/&nbsp; 기기 &nbsp;/&nbsp; 타임스탬프</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="footer">
+    <span>PARSING GUIDE v1.0</span>
+    <span>프론트 파싱 → MISO 전달</span>
+  </div>
+
+</div>
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.section-toggle');
+  if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); arrow.textContent = '▲'; }
+  else { body.classList.add('collapsed'); arrow.textContent = '▼'; }
+}
+function copyCode(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = document.querySelector(`.copy-btn[onclick="copyCode('${id}')"]`);
+    if (btn) { btn.textContent = '완료!'; btn.style.color = 'var(--green)'; setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 1500); }
+  });
+}
+</script>
+</body>
+</html>
