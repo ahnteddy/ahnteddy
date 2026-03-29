@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3단계: MISO 연결 & 병렬처리</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --text: #1e293b;
+  --muted: #94a3b8;
+  --muted2: #475569;
+  --green: #059669;
+  --blue: #2563eb;
+  --amber: #d97706;
+  --red: #dc2626;
+  --purple: #7c3aed;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.7; min-height: 100vh; }
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav-home { font-size: 13px; color: var(--muted2); text-decoration: none; font-weight: 600; transition: color 0.15s; }
+.nav-home:hover { color: var(--blue); }
+.nav-steps { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.nav-step { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 99px; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+.nav-step.active { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
+.nav-step.inactive { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+.nav-step.inactive:hover { background: var(--border); color: var(--text); }
+.nav-prev { font-size: 13px; font-weight: 700; color: var(--muted2); text-decoration: none; transition: color 0.15s; }
+.nav-prev:hover { color: var(--text); }
+
+.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+.header { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--purple); background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 4px; padding: 4px 10px; margin-bottom: 14px; letter-spacing: 0.05em;
+}
+.header-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s ease infinite; }
+h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+h1 span { background: linear-gradient(135deg, #7c3aed, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-sub { color: var(--muted2); font-size: 14px; }
+
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 36px; animation: fadeUp 0.5s ease 0.05s both; }
+.compare-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.compare-card.streaming { border-top: 3px solid var(--amber); }
+.compare-card.promise   { border-top: 3px solid var(--purple); }
+.compare-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+.compare-title.amber  { color: var(--amber); }
+.compare-title.purple { color: var(--purple); }
+.compare-desc { font-size: 13px; color: var(--muted2); line-height: 1.7; }
+.compare-desc b { color: var(--text); font-weight: 600; }
+.compare-tag { display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-bottom: 8px; }
+.tag-amber  { background: rgba(217,119,6,0.1);  color: var(--amber);  border: 1px solid rgba(217,119,6,0.2); }
+.tag-purple { background: rgba(124,58,237,0.1); color: var(--purple); border: 1px solid rgba(124,58,237,0.2); }
+
+.section { margin-bottom: 28px; animation: fadeUp 0.5s ease both; }
+.section:nth-child(4) { animation-delay: 0.1s; }
+.section:nth-child(5) { animation-delay: 0.15s; }
+.section:nth-child(6) { animation-delay: 0.2s; }
+.section:nth-child(7) { animation-delay: 0.25s; }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sn-green  { background: linear-gradient(135deg, #059669, #10b981); }
+.sn-blue   { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.sn-amber  { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.sn-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+.sn-red    { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.section-title { font-size: 16px; font-weight: 700; flex: 1; }
+.section-toggle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.section-body { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.section-body.collapsed { display: none; }
+
+.item { padding: 13px 20px; border-bottom: 1px solid var(--border); }
+.item:last-child { border-bottom: none; }
+.item-row { display: flex; align-items: flex-start; gap: 10px; }
+.item-dot { width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #2563eb); flex-shrink: 0; margin-top: 8px; }
+.item-text { font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
+.item-text b { color: #0f172a; font-weight: 700; }
+
+code { font-family: var(--mono); font-size: 12px; background: #f1f5f9; padding: 1px 6px; border-radius: 3px; color: var(--red); border: 1px solid var(--border2); }
+
+.hl { margin-top: 8px; padding: 9px 14px; border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.hl-green  { background: rgba(5,150,105,0.07);  color: #065f46; border: 1px solid rgba(5,150,105,0.2); }
+.hl-blue   { background: rgba(37,99,235,0.07);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.2); }
+.hl-amber  { background: rgba(217,119,6,0.07);  color: #92400e; border: 1px solid rgba(217,119,6,0.2); }
+.hl-purple { background: rgba(124,58,237,0.07); color: #5b21b6; border: 1px solid rgba(124,58,237,0.2); }
+
+.info-box { padding: 13px 20px; background: rgba(37,99,235,0.04); border-bottom: 1px solid rgba(37,99,235,0.1); font-size: 13px; color: #1d4ed8; line-height: 1.6; }
+.ok-box   { padding: 13px 20px; background: rgba(5,150,105,0.05); border-top: 1px solid rgba(5,150,105,0.15); font-size: 13px; color: #065f46; line-height: 1.6; }
+.warn-box { padding: 13px 20px; background: rgba(217,119,6,0.06); border-top: 1px solid rgba(217,119,6,0.2); font-size: 13px; color: #92400e; line-height: 1.6; }
+
+.caution-list { list-style: none; }
+.caution-item { display: flex; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--border); }
+.caution-item:last-child { border-bottom: none; }
+.caution-tag { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; font-weight: 600; }
+.tag-red    { background: rgba(220,38,38,0.08);  color: var(--red);    border: 1px solid rgba(220,38,38,0.2); }
+.tag-green  { background: rgba(5,150,105,0.08);  color: var(--green);  border: 1px solid rgba(5,150,105,0.2); }
+.tag-blue   { background: rgba(37,99,235,0.08);  color: var(--blue);   border: 1px solid rgba(37,99,235,0.2); }
+.caution-text { font-size: 13px; color: var(--muted2); line-height: 1.6; }
+.caution-text b { color: var(--text); font-weight: 600; }
+.caution-text code { font-family: var(--mono); font-size: 11px; background: #f1f5f9; border: 1px solid var(--border2); border-radius: 3px; padding: 1px 6px; color: var(--red); }
+
+.code-label { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #f8fafc; border-top: 1px solid var(--border); }
+.code-label-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.copy-btn { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border2); border-radius: 4px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; }
+.copy-btn:hover { color: var(--purple); border-color: var(--purple); }
+
+.code-block { padding: 18px 20px; background: #f8fafc; overflow-x: auto; border-top: 1px solid var(--border); }
+.code-block pre { font-family: var(--mono); font-size: 12px; line-height: 1.9; color: #1e293b; white-space: pre-wrap; }
+
+.flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 12px; }
+.flow-node { padding: 4px 12px; border-radius: 99px; font-weight: 600; white-space: nowrap; }
+.fn-purple { background: rgba(124,58,237,0.1); color: var(--purple); border: 1px solid rgba(124,58,237,0.2); }
+.fn-blue   { background: rgba(37,99,235,0.1);  color: var(--blue);   border: 1px solid rgba(37,99,235,0.2); }
+.fn-amber  { background: rgba(217,119,6,0.1);  color: var(--amber);  border: 1px solid rgba(217,119,6,0.2); }
+.fn-green  { background: rgba(5,150,105,0.1);  color: var(--green);  border: 1px solid rgba(5,150,105,0.2); }
+.flow-arrow { color: var(--muted); }
+
+.footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-prev" href="해커톤파싱가이드.html">← 이전</a>
+  <div class="nav-steps">
+    <a class="nav-step inactive" href="해커톤스킬(프론트백연결).html">1단계: 프론트-백 연결</a>
+    <a class="nav-step inactive" href="해커톤파싱가이드.html">2단계: 파싱 가이드</a>
+    <a class="nav-step active" href="해커톤병렬처리가이드.html">3단계: MISO 연결 & 병렬처리</a>
+  </div>
+  <a class="nav-home" href="index.html">메뉴 →</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-badge">STEP 3 · HACKATHON CHEATSHEET</div>
+    <h1>MISO 연결 & <span>병렬처리 가이드</span></h1>
+    <p class="header-sub">파싱된 여러 데이터를 동시에 처리하는 프로세스</p>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card streaming">
+      <div class="compare-tag tag-amber">Streaming</div>
+      <div class="compare-title amber">스트리밍</div>
+      <div class="compare-desc">
+        <b>하나의 응답</b>이 타이핑되듯 글자 단위로 흘러나오는 방식.<br>
+        ex) ChatGPT처럼 답변이 실시간으로 보임.<br><br>
+        → 1건을 길게 받을 때 유용<br>
+        → route.ts 구현이 복잡함 (SSE 처리 필요)
+      </div>
+    </div>
+    <div class="compare-card promise">
+      <div class="compare-tag tag-purple">Promise.all</div>
+      <div class="compare-title purple">Promise.all 병렬처리</div>
+      <div class="compare-desc">
+        <b>여러 건을 동시에</b> 요청하고 완료된 것부터 화면에 표시.<br>
+        구현 단순.<br><br>
+        → 여러 데이터를 한번에 던지는 것이 아닌<br>
+        → 여러 데이터를 각각 나누어 동시에 요청<br>
+        → 프론트의 기능 (JS 기본 문법)
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 전체 흐름 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-purple">1</div>
+      <div class="section-title">전체 흐름</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">프론트에서 파싱 완료 → 구조화된 텍스트로 변환 → MISO로 전달되는 로직은 기존과 동일</div></div>
+      </div>
+      <div class="flow-diagram">
+        <span class="flow-node fn-purple">카드 데이터</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-amber">route.ts</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-amber">MISO /chat</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-green">결과 표시</span>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>Promise.all은 프론트 단계</b>에서 처리</div></div>
+        <div class="hl hl-purple">MISO 워크플로우는 건별로 1건씩 받음. 여러 건 동시 처리는 프론트가 담당</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Promise.all 구현 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-purple">2</div>
+      <div class="section-title">Promise.all 병렬처리 구현</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box">프론트(page.tsx)에서만 처리 — route.ts는 넘겨주는 역할, 어떻게(how) 넘길지는 page.tsx가 담당</div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text">카드 N개를 동시에 MISO로 요청, 완료된 것부터 화면에 순차 표시</div></div>
+        <div class="hl hl-purple">사람 — 시액조제일지 1건 검토 시간: 10분</div>
+        <div class="hl hl-purple" style="margin-top:4px;">AI — 시액조제일지 1건 검토 시간: 10초</div>
+        <div class="hl hl-amber" style="margin-top:4px;">AI (순차처리) — 10건 검토 시간: 100초</div>
+        <div class="hl hl-green" style="margin-top:4px;">AI (Promise.all 적용) — 10건 검토 시간: 10초 (1건과 동일)</div>
+      </div>
+      <div class="ok-box">✓ LLM에 넘길 때 "Promise.all로 적용해달라고" 요청만 하면 됩니다</div>
+    </div>
+  </div>
+
+  <!-- 3. MISO 워크플로우 세팅 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-amber">3</div>
+      <div class="section-title">MISO 워크플로우 세팅 (기초 작업)</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>워크플로우 구조</b></div></div>
+        <div class="hl hl-amber">시작 노드 → 지식 검색 노드 → LLM 노드 → 답변 노드</div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>시작 노드</b> — 입력변수 1개 (변수 유형: 문단 / 변수 이름: input)</div></div>
+        <div class="hl hl-amber">변수명을 바꾸면 route.ts도 함께 수정해야 함</div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>지식 검색 노드</b> — 입력변수에 시작 노드의 input 연결 / 지식: LIMS사용자.csv / 출력변수: result</div></div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>LLM 노드</b> — 시스템 프롬프트에 input + 지식검색 result 연결 / 사용자 프롬프트 필수 (최소 1개)</div></div>
+      </div>
+      <div class="item">
+        <div class="item-row"><div class="item-dot"></div><div class="item-text"><b>답변 노드</b> — LLM의 text 출력 변수 연결</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. LLM 프롬프트 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-green">4</div>
+      <div class="section-title">LLM 시스템 프롬프트</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="code-label">
+        <span class="code-label-text">MISO LLM 노드 시스템 프롬프트</span>
+        <button class="copy-btn" onclick="copyCode('code2')">복사</button>
+      </div>
+      <div class="code-block">
+        <pre id="code2">당신은 일동제약 시액조제일지를 검토하는 AI입니다.
+
+[시액조제번호 형식 규칙]
+이니셜-YMMDD-NN
+- 이니셜: 시험자 이니셜
+- Y: 연도 끝 1자리 (예: 2026년 → 6)
+- MM: 월 2자리
+- DD: 일 2자리
+- NN: 일련번호 2자리
+- 예시: HWS-60327-03 = 신혜원(HWS), 2026년 3월 27일, 3번째
+
+[검토 항목]
+1. 이니셜: 지식베이스의 시험자 이니셜과 시액조제번호 앞 이니셜이 일치하는가
+2. 유효기한: 유효기한이 기재되어 있는가
+3. 시액조제번호 규칙: 이니셜-YMMDD-NN 형식을 따르는가
+
+[출력 형식 - 반드시 아래 형식만 사용]
+1. 이니셜 : 적합(신혜원 - HWS) 또는 부적합(신혜원 - HWS ≠ ABC)
+2. 유효기한 : 2026-06-26(기재완료) 또는 미기재
+3. 시액조제번호 규칙 : 적합(HWS-60327-03) 또는 부적합(사유)
+
+마크다운, #, **, 사유 설명 없이 위 3줄만 출력하세요.</pre>
+      </div>
+      <div class="warn-box">⚠ 사용자 프롬프트도 반드시 넣어야 함 (LLM 노드 필수 조건) — "위 데이터를 검토해주세요." 한 줄이면 충분</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>MISO GUIDE v1.0</span>
+    <span>파싱 → MISO 연결 → 병렬처리</span>
+  </div>
+
+</div>
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.section-toggle');
+  if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); arrow.textContent = '▲'; }
+  else { body.classList.add('collapsed'); arrow.textContent = '▼'; }
+}
+function copyCode(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = document.querySelector(`.copy-btn[onclick="copyCode('${id}')"]`);
+    if (btn) { btn.textContent = '완료!'; btn.style.color = 'var(--purple)'; setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 1500); }
+  });
+}
+</script>
+</body>
+</html>
