@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4단계: 파싱 & 지식검색 추가</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface2: #f1f3f5;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --text: #1e293b;
+  --muted: #94a3b8;
+  --muted2: #475569;
+  --green: #059669;
+  --blue: #2563eb;
+  --amber: #d97706;
+  --red: #dc2626;
+  --purple: #7c3aed;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.7; min-height: 100vh; }
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav-home { font-size: 13px; color: var(--muted2); text-decoration: none; font-weight: 600; transition: color 0.15s; }
+.nav-home:hover { color: var(--blue); }
+.nav-steps { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.nav-step { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 99px; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+.nav-step.active { background: linear-gradient(135deg, #059669, #10b981); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.3); }
+.nav-step.inactive { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+.nav-step.inactive:hover { background: var(--border); color: var(--text); }
+.nav-prev { font-size: 13px; font-weight: 700; color: var(--muted2); text-decoration: none; transition: color 0.15s; }
+.nav-prev:hover { color: var(--text); }
+
+.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+.header { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--green); background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.2);
+  border-radius: 4px; padding: 4px 10px; margin-bottom: 14px; letter-spacing: 0.05em;
+}
+.header-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+h1 span { background: linear-gradient(135deg, #059669, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-sub { color: var(--muted2); font-size: 14px; }
+
+.section { margin-bottom: 28px; animation: fadeUp 0.5s ease both; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+.section:nth-child(6) { animation-delay: 0.25s; }
+.section:nth-child(7) { animation-delay: 0.3s; }
+
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sn-green  { background: linear-gradient(135deg, #059669, #10b981); }
+.sn-blue   { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.sn-amber  { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.sn-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+.sn-red    { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.section-title { font-size: 16px; font-weight: 700; flex: 1; }
+.section-toggle { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.section-body { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.section-body.collapsed { display: none; }
+
+/* 체크박스 아이템 */
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { background: #f8faff; }
+.check-item.done { background: #f8fffe; }
+
+.checkbox {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  background: white;
+}
+.check-item.done .checkbox {
+  background: var(--green);
+  border-color: var(--green);
+}
+.checkbox-tick { color: white; font-size: 12px; display: none; }
+.check-item.done .checkbox-tick { display: block; }
+
+.check-text { font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
+.check-item.done .check-text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--green); }
+.check-text b { color: #0f172a; font-weight: 700; }
+.check-item.done .check-text b { color: var(--muted); }
+
+.check-sub { margin-top: 4px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.check-item.done .check-sub { text-decoration: line-through; text-decoration-color: var(--muted); }
+
+code { font-family: var(--mono); font-size: 12px; background: #f1f5f9; padding: 1px 6px; border-radius: 3px; color: var(--red); border: 1px solid var(--border2); }
+.check-item.done code { color: var(--muted); background: #f8f9fa; }
+
+.hl { margin-top: 8px; padding: 9px 14px; border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.hl-green  { background: rgba(5,150,105,0.07);  color: #065f46; border: 1px solid rgba(5,150,105,0.2); }
+.hl-blue   { background: rgba(37,99,235,0.07);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.2); }
+.hl-amber  { background: rgba(217,119,6,0.07);  color: #92400e; border: 1px solid rgba(217,119,6,0.2); }
+.hl-purple { background: rgba(124,58,237,0.07); color: #5b21b6; border: 1px solid rgba(124,58,237,0.2); }
+.hl-red    { background: rgba(220,38,38,0.07);  color: #991b1b; border: 1px solid rgba(220,38,38,0.2); }
+
+.info-box { padding: 13px 20px; background: rgba(37,99,235,0.04); border-bottom: 1px solid rgba(37,99,235,0.1); font-size: 13px; color: #1d4ed8; line-height: 1.6; }
+.ok-box   { padding: 13px 20px; background: rgba(5,150,105,0.05); border-top: 1px solid rgba(5,150,105,0.15); font-size: 13px; color: #065f46; line-height: 1.6; }
+.warn-box { padding: 13px 20px; background: rgba(217,119,6,0.06); border-top: 1px solid rgba(217,119,6,0.2); font-size: 13px; color: #92400e; line-height: 1.6; }
+
+.code-label { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #f8fafc; border-top: 1px solid var(--border); }
+.code-label-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.copy-btn { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border2); border-radius: 4px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; }
+.copy-btn:hover { color: var(--green); border-color: var(--green); }
+
+.code-block { padding: 18px 20px; background: #f8fafc; overflow-x: auto; border-top: 1px solid var(--border); }
+.code-block pre { font-family: var(--mono); font-size: 12px; line-height: 1.9; color: #1e293b; white-space: pre-wrap; }
+
+.flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 12px; }
+.flow-node { padding: 4px 12px; border-radius: 99px; font-weight: 600; white-space: nowrap; }
+.fn-purple { background: rgba(124,58,237,0.1); color: var(--purple); border: 1px solid rgba(124,58,237,0.2); }
+.fn-blue   { background: rgba(37,99,235,0.1);  color: var(--blue);   border: 1px solid rgba(37,99,235,0.2); }
+.fn-amber  { background: rgba(217,119,6,0.1);  color: var(--amber);  border: 1px solid rgba(217,119,6,0.2); }
+.fn-green  { background: rgba(5,150,105,0.1);  color: var(--green);  border: 1px solid rgba(5,150,105,0.2); }
+.flow-arrow { color: var(--muted); }
+
+/* 진행률 바 */
+.progress-wrap { margin-bottom: 36px; animation: fadeUp 0.5s ease 0.05s both; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.progress-label { font-size: 13px; font-weight: 600; color: var(--muted2); }
+.progress-count { font-family: var(--mono); font-size: 12px; color: var(--green); font-weight: 600; }
+.progress-bar { height: 6px; background: var(--border2); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #059669, #10b981); border-radius: 99px; transition: width 0.3s ease; }
+
+.footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-prev" href="해커톤병렬처리가이드.html">← 이전</a>
+  <div class="nav-steps">
+    <a class="nav-step inactive" href="해커톤스킬(프론트백연결).html">1단계</a>
+    <a class="nav-step inactive" href="해커톤파싱가이드.html">2단계</a>
+    <a class="nav-step inactive" href="해커톤병렬처리가이드.html">3단계</a>
+    <a class="nav-step active" href="해커톤4단계가이드.html">4단계: 파싱 & 지식검색</a>
+  </div>
+  <a class="nav-home" href="index.html">메뉴 →</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-badge">STEP 4 · HACKATHON CHEATSHEET</div>
+    <h1>파싱 & <span>지식검색 추가</span></h1>
+    <p class="header-sub">파싱 로직 적용 → 디버깅 → 지식검색 연동까지</p>
+  </div>
+
+  <!-- 진행률 바 -->
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-label">전체 진행률</span>
+      <span class="progress-count" id="progressCount">0 / 10 완료</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- 1. 파싱 로직 적용 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-blue">1</div>
+      <div class="section-title">파싱 로직 적용</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box">LLM에 page.tsx + route.ts를 넘기고 파싱 로직 적용을 요청</div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>page.tsx에 파싱 함수 추가</b>
+          <div class="check-sub">시험자, 시액명, 시액조제번호, 유효기한, 지시문 등 파싱</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>카드 형식으로 화면에 표시 확인</b>
+          <div class="check-sub">붙여넣기 후 시액명 (HWS-XXXXX-XX) 형태로 카드 등록되는지 확인</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 파싱 디버깅 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-red">2</div>
+      <div class="section-title">파싱 디버깅</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box">파싱이 프론트에서 잘 됐어도, MISO가 이를 올바르게 받는지 별도로 확인해야 함</div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>MISO 워크플로우를 임시로 단순하게 구성</b>
+          <div class="check-sub">시작 노드 → 답변 노드만 연결</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>답변 노드에 input 변수 그대로 연결</b>
+          <div class="check-sub">받은 값에다가 텍스트를 추가해서 돌려보내서 프론트로부터 받은 텍스트가 잘 도착했는지 확인</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>파싱 디버깅</b>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 지식검색 추가 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-amber">3</div>
+      <div class="section-title">지식검색 추가</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>MISO 플레이그라운드·앱 리스트 → 지식관리 → + 지식 추가하기 → 데이터 업로드 하기 → 텍스트 파일에서 가져오기</b>
+          <div class="check-sub">LIMS사용자.csv 파일 업로드</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>검색 설정: 키워드 검색</b>
+          <div class="check-sub">벡터 검색(의미 기반)이 아닌 키워드 검색(Ctrl+F 방식) — 이름을 정확히 찾기 위함</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 워크플로우 설정 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-purple">4</div>
+      <div class="section-title">워크플로우 설정</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>지식 검색 노드 추가</b>
+          <div class="check-sub">시작 노드와 답변 노드 사이에 삽입</div>
+        </div>
+      </div>
+      <div class="flow-diagram">
+        <span class="flow-node fn-blue">시작</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-amber">지식 검색</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-purple">LLM</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node fn-green">답변</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>지식 검색 노드 설정</b>
+          <div class="check-sub">입력 변수: 시작 노드의 input / 지식: LIMS사용자.csv / 출력 변수: result (기본값 유지)</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>LLM 노드 추가 (Claude 4.5 Sonnet → 답변이 가장 군더더기가 없음)</b>
+          <div class="check-sub">시스템 프롬프트에 input + result 연결 / 사용자 프롬프트 최소 1개 필수</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>LLM 시스템 프롬프트 설정</b>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <pre id="prompt1">당신은 일동제약 시액조제일지를 검토하는 AI입니다.
+
+[시액조제번호 형식 규칙]
+이니셜-YMMDD-NN
+- 이니셜: 시험자 이니셜
+- Y: 연도 끝 1자리 (예: 2026년 → 6)
+- MM: 월 2자리
+- DD: 일 2자리
+- NN: 일련번호 2자리
+- 예시: HWS-60327-03 = 신혜원(HWS), 2026년 3월 27일, 3번째
+
+[검토 항목]
+1. 이니셜: 지식베이스의 시험자 이니셜과 시액조제번호 앞 이니셜이 일치하는가
+2. 유효기한: 유효기한이 기재되어 있는가
+3. 시액조제번호 규칙: 이니셜-YMMDD-NN 형식을 따르는가
+
+[출력 형식 - 반드시 아래 형식만 사용]
+1. 이니셜 : 적합(신혜원 - HWS) 또는 부적합(신혜원 - HWS ≠ ABC)
+2. 유효기한 : 2026-06-26(기재완료) 또는 미기재
+3. 시액조제번호 규칙 : 적합(HWS-60327-03) 또는 부적합(사유)
+
+마크다운, #, **, 사유 설명 없이 위 3줄만 출력하세요.</pre>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>저장하기 → 발행하기</b>
+          <div class="check-sub">발행해야 외부(프론트)에서 호출 가능</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 최종 디버깅 -->
+  <div class="section">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-num sn-green">5</div>
+      <div class="section-title">최종 디버깅</div>
+      <div class="section-toggle">▲</div>
+    </div>
+    <div class="section-body">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>MISO 테스트하기 탭에서 먼저 확인</b>
+          <div class="check-sub">input에 cardToText 형식 텍스트 붙여넣고 실행 → 3줄 결과 확인</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="check-text">
+          <b>프론트에서 AI 검토 시작 → 최종 결과 확인</b>
+          <div class="check-sub">아래처럼 나오면 완료</div>
+        </div>
+      </div>
+      <div class="code-block">
+        <pre>1. 이니셜 : 적합(신혜원 - HWS)
+2. 유효기한 : 2026-06-26(기재완료)
+3. 시액조제번호 규칙 : 적합(HWS-60327-03)</pre>
+      </div>
+      <div class="ok-box">✓ 여기까지 완료되면 파싱 + RAG(Retrieval-Augmented Generation, 외부 데이터를 기반으로 답변 생성하는 방식) 기반 AI 검토 시스템 완성!</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>PARSING & RAG GUIDE v1.0</span>
+    <span>파싱 → 지식검색 → LLM 검토</span>
+  </div>
+
+</div>
+<script>
+const TOTAL = document.querySelectorAll('.check-item').length;
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = document.querySelectorAll('.check-item.done').length;
+  const pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = done + ' / ' + TOTAL + ' 완료';
+}
+
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.section-toggle');
+  if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); arrow.textContent = '▲'; }
+  else { body.classList.add('collapsed'); arrow.textContent = '▼'; }
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = document.querySelector(`.copy-btn[onclick="copyCode('${id}')"]`);
+    if (btn) { btn.textContent = '완료!'; btn.style.color = 'var(--green)'; setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 1500); }
+  });
+}
+</script>
+</body>
+</html>
