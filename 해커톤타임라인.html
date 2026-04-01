@@ -6,22 +6,39 @@
 <title>해커톤 타임라인</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap');
+
 body {
   margin: 0;
   font-family: 'Noto Sans KR', sans-serif;
   background: linear-gradient(135deg, #e0f2fe, #dcfce7);
 }
+
 .wrap {
   max-width: 1100px;
   margin: 0 auto;
   padding: 30px 16px;
+  position: relative;
 }
+
 .title {
   text-align: center;
   margin-bottom: 20px;
+  position: relative;
 }
+
 .title h1 { font-size: 28px; }
 .title p { color: #555; font-size: 14px; }
+
+/* 우측 상단 DDAY */
+.top-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  text-align: right;
+  font-weight: 700;
+}
+.top-right .dday { color: #0a8f5c; font-size: 18px; }
+.top-right .progress { font-size: 13px; color: #333; }
 
 .month-nav {
   display: flex;
@@ -79,15 +96,6 @@ body {
   border: 2px solid #0a8f5c;
   background: #dcfce7;
 }
-.dday-box {
-  margin-top: 20px;
-  text-align: center;
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-.dday-box b { font-size: 22px; color: #0a8f5c; }
 
 @media (max-width: 600px) {
   .calendar { display: flex; flex-direction: column; }
@@ -96,14 +104,22 @@ body {
   .day.empty { display: none; }
   .date { font-size: 16px; }
   .event { font-size: 13px; }
+  .top-right { position: static; margin-top: 10px; text-align: center; }
 }
 </style>
 </head>
+
 <body>
 <div class="wrap">
   <div class="title">
     <h1>🚀 해커톤 타임라인</h1>
     <p id="todayText"></p>
+
+    <!-- 우측 상단 -->
+    <div class="top-right">
+      <div class="dday" id="dday"></div>
+      <div class="progress" id="progress"></div>
+    </div>
   </div>
 
   <div class="month-nav">
@@ -116,17 +132,11 @@ body {
     <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
   </div>
   <div class="calendar" id="calendar"></div>
-
-  <div class="dday-box">
-    해커톤 (2026.04.15 ~ 04.16)<br>
-    <b id="dday"></b>
-  </div>
 </div>
 
 <script>
 const events = {
-  '2026-3-8':  "📘 파이썬 개념 숙지 및 GUI이해",
-  '2026-3-9':  "📘 파이썬 개념 숙지 및 GUI이해",
+  '2026-3-9':  "📘 파이썬 개념 숙지 및 GUI이해 (1일차)",
   '2026-3-10': "🤖 LLM 이해 + tkinter GUI + 정적 크롤링",
   '2026-3-11': "🕷️ 동적 크롤링 + pyQt GUI",
   '2026-3-12': "🎯 웹자동화 기초<br>✨ 해커톤멤버선발",
@@ -138,10 +148,10 @@ const events = {
   '2026-3-20': "✍️ GPT API 활용",
   '2026-3-24': "🎬 팀 미팅1(영상제작)",
   '2026-3-25': "🔗 FE-BE 연결",
-  '2026-3-27': "🎬 팀 미팅2(발표순서, FE-BE 연결 교육)",
+  '2026-3-27': "🎬 팀 미팅2",
   '2026-3-28': "📘 FE-BE 연결 익숙해지기",
-  '2026-3-30': "📚 DB도입<br>(사용자이니셜 CSV파일 만들기)<br>🛠️ 프론트 파싱 교육",
-  '2026-3-31': "📚 DB도입<br>(시액유효기한, 공정서, 제품별사용시액)<br>🎬 팀 영상 제출",
+  '2026-3-30': "📚 DB도입",
+  '2026-3-31': "📚 DB도입",
   '2026-4-15': "🏆 해커톤 DAY 1",
   '2026-4-16': "🏆 해커톤 DAY 2",
 };
@@ -158,9 +168,17 @@ function format(date) {
 
 document.getElementById('todayText').innerText = `오늘: ${format(today)}`;
 
+/* D-DAY */
 const hackathon = new Date(2026, 3, 15);
 const diff = Math.ceil((hackathon - today) / (1000*60*60*24));
-document.getElementById('dday').innerText = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day!' : '종료';
+document.getElementById('dday').innerText =
+  diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day' : '종료';
+
+/* 진행일 */
+const startDate = new Date(2026, 2, 9);
+const progress = Math.floor((today - startDate) / (1000*60*60*24)) + 1;
+document.getElementById('progress').innerText =
+  `바이브코딩 ${progress}일째`;
 
 function changeMonth(dir) {
   currentMonth += dir;
@@ -192,15 +210,17 @@ function renderCalendar() {
     const isToday = today.getFullYear() === currentYear &&
                     today.getMonth() + 1 === currentMonth &&
                     today.getDate() === i;
+
     const isHackathon = hackathonDays.includes(key);
 
-    if (isToday)      div.classList.add('today');
-    if (isHackathon)  div.classList.add('hackathon');
+    if (isToday) div.classList.add('today');
+    if (isHackathon) div.classList.add('hackathon');
 
     div.innerHTML = `
       <div class="date">${i}일</div>
       ${events[key] ? `<div class="event">${events[key]}</div>` : ''}
     `;
+
     cal.appendChild(div);
   }
 }
