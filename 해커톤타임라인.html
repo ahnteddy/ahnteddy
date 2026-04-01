@@ -149,8 +149,8 @@ const events = {
 const hackathonDays = ['2026-4-15', '2026-4-16'];
 
 const today = new Date();
-let currentYear  = 2026;
-let currentMonth = 3; // 3월부터 시작
+let currentYear  = today.getFullYear();
+let currentMonth = today.getMonth() + 1;
 
 function format(date) {
   return `${date.getFullYear()}.${date.getMonth()+1}.${date.getDate()}`;
