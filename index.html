@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="symbol.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap');
+
 body {
   margin: 0;
   font-family: 'Noto Sans KR', sans-serif;
@@ -16,9 +17,33 @@ body {
   justify-content: center;
   height: 100vh;
 }
-.wrap { width: 100%; max-width: 400px; text-align: center; }
-h1 { margin-bottom: 30px; font-size: 26px; font-weight: 800; }
-.menu { display: flex; flex-direction: column; gap: 14px; }
+
+.wrap {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 30px;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* PC에서 가로 정렬 */
+@media (min-width: 768px) {
+  .menu {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
 .card {
   background: #fff;
   padding: 18px;
@@ -28,19 +53,43 @@ h1 { margin-bottom: 30px; font-size: 26px; font-weight: 800; }
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   transition: all 0.2s;
+  flex: 1;
 }
-.card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+
+/* 이미지 영역 */
+.flowchart {
+  margin-top: 30px;
+}
+
+.flowchart img {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>🚀 해커톤 메뉴</h1>
+
   <div class="menu">
     <a class="card" href="해커톤타임라인.html">📅 타임라인</a>
     <a class="card" href="해커톤발표관련.html">🎤 발표 관련</a>
     <a class="card" href="해커톤스킬(프론트백연결).html">🛠️ Flow chart</a>
     <a class="card" href="miso-test.html">🗂️ 지식베이스 문서조회 테스트</a>
   </div>
+
+  <div class="flowchart">
+    <img src="flowchart.png" alt="Flow Chart">
+  </div>
+
 </div>
 </body>
 </html>
